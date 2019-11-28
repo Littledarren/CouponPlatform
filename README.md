@@ -4,7 +4,7 @@
 
 ## 关于文档
 
-项目相关的文档请访问http://shendianjiao.cn:8080，对应的仓库地址及编辑文档的说明请查看仓库https://github.com/2019FallSem/CouponPlatformDocs 。
+项目相关的文档请访问 http://shendianjiao.cn:8080 ，对应的仓库地址及编辑文档的说明请查看仓库 https://github.com/2019FallSem/CouponPlatformDocs 。
 
 ## 目录结构
 
@@ -26,7 +26,7 @@ $ node bin/www
 
 > 输出`Listening on port 3000`则服务已启动
 
-## Trouble Shooting
+## Troubleshooting
 
 如果运行Node容器时提示连接不到数据库，请检查`server/src/config.js`中`module.exports`的`db`字段：
 - 主机环境下，将其修改为`localhost`
