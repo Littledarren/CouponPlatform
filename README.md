@@ -4,7 +4,7 @@
 
 ## 关于文档
 
-项目相关的文档请访问 http://shendianjiao.cn:8080 ，对应的仓库地址及编辑文档的说明请查看仓库 https://github.com/2019FallSem/CouponPlatformDocs 。
+项目相关的文档请访问 http://shendianjiao.cn:8080 ，对应的仓库地址及编辑文档的说明请查看仓库 https://github.com/2019FallSem-cdfhlz/CouponPlatformDocs 。
 
 ## 目录结构
 
