@@ -8,5 +8,5 @@ module.exports = {
   base: 'coupon',
   port: '3000',
   root: '',
-  secret: ''
+  secret: 'coupon'
 }
