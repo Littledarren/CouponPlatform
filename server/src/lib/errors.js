@@ -17,7 +17,7 @@ module.exports = {
    */
   ForbiddenError: class ForbiddenError extends CodedError {
     constructor (message) {
-      super('Forbidden', 1)
+      super(message, 1)
     }
   },
   /**
@@ -33,7 +33,7 @@ module.exports = {
    */
   NotFoundError: class NotFoundError extends CodedError {
     constructor (message) {
-      super('Not found', 3)
+      super(message, 3)
     }
-  }
+  },
 }
