@@ -21,7 +21,15 @@ const schema = new Schema({
         type: Number,
         default: 1
     },
-    description: String
+    description: String,
+    stock: {
+        type: Number,
+        required: true
+    },
+    created: {
+        type: Date,
+        default: () => new Date
+    }
 })
 
 schema.set('toJSON', { versionKey: false })
