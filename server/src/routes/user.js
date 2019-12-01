@@ -11,27 +11,31 @@ const { AuthorizationError } = require('../lib/errors')
 const router = new Router()
 
 router.post('/users', async (ctx, next) => {
-    const { username, kind, password } = ctx.request.body
-    
-    const user = new User({ _id: username, kind, password: md5(password) })
+  const { username, kind, password } = ctx.request.body
 
-    await user.save()
+  const user = new User({ _id: username, kind, password: md5(password) })
 
-    ctx.result = emptyResponse
+  await user.save()
 
-    return next()
+  ctx.result = emptyResponse
+
+  return next()
 })
 
 router.post('/auth', async (ctx, next) => {
-    const { username, password } = ctx.request.body
+  const { username, password } = ctx.request.body
 
-    const result = await User.findOne({ _id: username, password: md5(password) })
+  const result = await User.findOne({ _id: username, password: md5(password) })
 
-    if (!result) {
-        ctx.response.header['Authorization'] = 'Bearer ' + jwt.sign({ sub: result.username }, config.secret, { expiresIn: '1 hours' })
-    } else throw new AuthorizationError('Authorization error')
-    
-    return next()
+  if (result != null) {
+    // 添加token到响应头
+    ctx.append('Authorization', `Bearer ${jwt.sign({ sub: result._id, kind: result.kind }, config.secret, { expiresIn: '1 hours' })}`)
+    ctx.result = {
+      kind: result.kind
+    }
+  } else throw new AuthorizationError('Authorization error')
+
+  return next()
 })
 
 module.exports = router
