@@ -21,10 +21,21 @@ $ cd server
 $ npm i
 
 // 默认监听3000端口
-$ node bin/www
+$ npm run start
 ```
 
 > 输出`Listening on port 3000`则服务已启动
+
+## 单元测试
+
+```
+$ cd server
+
+$ npm i --only=dev
+
+// 默认使用3011端口
+$ npm run test
+```
 
 ## Troubleshooting
 
