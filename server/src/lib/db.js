@@ -6,10 +6,11 @@ const mongoose = require('mongoose')
 // mongoose 要求替换内置的 Promise
 mongoose.Promise = global.Promise
 
+mongoose.set('useFindAndModify', false)
+
 const conn = mongoose.createConnection(config.db, {
   useNewUrlParser: true,
-  useUnifiedTopology: true,
-  useFindAndModify: true
+  useUnifiedTopology: true
 })
 
 // 连接默认数据库
