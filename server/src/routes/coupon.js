@@ -58,7 +58,9 @@ router.patch('/users/:uid/coupons/:cid', async (ctx, next) => {
 // 新建优惠券
 router.post('/users/:uid/coupons', async (ctx, next) => {
   const { uid } = ctx.params
-  if (ctx.state.user.sub != uid) throw new ForbiddenError('Authorization error');
+  const { sub, kind } = ctx.state.user
+  if (sub !== uid) throw new ForbiddenError('Authorization error');
+  if (kind !== 'saler') throw new ForbiddenError('You\'re not a saler')
 
   const { name, amount, description, stock } = ctx.request.body
 
