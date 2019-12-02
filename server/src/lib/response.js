@@ -17,7 +17,7 @@ function responseHandler (ctx) {
 function errorHandler (ctx, next) {
   return next().catch(err => {
     err = err.error || err
-    logger.error(err.message.trim())
+    if (process.env.NODE_ENV !== 'test') logger.error(err.message.trim())
 
     ctx.body = {
       code: err.code || -1,

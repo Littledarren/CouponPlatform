@@ -4,7 +4,8 @@
   "description": "软件工程方法论大作业",
   "main": "bin/www",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha test/index.js --harmony",
+    "start": "node bin/www"
   },
   "repository": {
     "type": "git",
@@ -27,5 +28,12 @@
     "koa-router": "^7.4.0",
     "log4js": "^6.0.0",
     "mongoose": "^5.7.11"
+  },
+  "devDependencies": {
+    "axios": "^0.19.0",
+    "mocha": "^6.2.2",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.5",
+    "should": "^13.2.3"
   }
 }
