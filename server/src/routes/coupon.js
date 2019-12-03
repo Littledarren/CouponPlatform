@@ -55,7 +55,7 @@ router.patch('/users/:uid/coupons/:cid', async (ctx, next) => {
   if (await User.findOne({ _id: user.sub, hasCoupons: { $elemMatch: { $eq: cid } } }))
     throw new InvalidUserInputError('你已经拥有该优惠券了')
 
-  const coupon = await Coupon.findOneAndUpdate({ coupons: cid, amount: { $gt: 0 } }, { $inc: { amount: -1 } })
+  const coupon = await Coupon.findOneAndUpdate({ coupons: cid, left: { $gt: 0 } }, { $inc: { amount: -1 } })
   if (!coupon) throw new NotFoundError("优惠券不存在或优惠券已经被抢光了")
 /*
   await new Coupon({
