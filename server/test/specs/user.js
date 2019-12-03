@@ -15,6 +15,8 @@ describe('用户', () => {
       }
     })
 
-    ;(await req.post(`/auth`, { body: { username: 'test1', password: '123456' } })).kind.should.be.eql('saler', '成功注册')
+    result.statusCode.should.be.eql(200, '注册成功')
+
+    ;(await req.post(`/auth`, { body: { username: 'test1', password: '123456' } })).body.kind.should.be.eql('saler', '登录成功')
   })
 })

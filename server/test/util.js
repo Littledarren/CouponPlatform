@@ -6,7 +6,7 @@ const config = require('../src/config')
 const req = require('request-promise').defaults({
   baseUrl: `http://localhost:${config.port}/api`,
   json: true,
-  simple: false
+  resolveWithFullResponse: true
 })
 
 module.exports = {
