@@ -16,6 +16,8 @@ router.post('/users', async (ctx, next) => {
   if (kind !== 'saler' && kind !== 'customer') 
     throw new InvalidUserInputError('Kind field must be \'customer\' or \'saler\'')
 
+  if (await User.findById(username)) throw new InvalidUserInputError('用户名已被占用')
+
   await new User({ _id: username, kind: (kind === 'saler' ? 1 : 0) , password: md5(password) }).save()
 
   ctx.result = emptyResponse
