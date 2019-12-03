@@ -13,12 +13,12 @@ const router = new Router()
 router.post('/users', async (ctx, next) => {
   const { username, kind, password } = ctx.request.body
 
-  const user = new User({ _id: username, kind, password: md5(password) })
+  if (kind !== 'saler' && kind !== 'customer') 
+    throw new InvalidUserInputError('Kind field must be \'customer\' or \'saler\'')
 
-  await user.save()
+  await new User({ _id: username, kind: (kind === 'saler' ? 1 : 0) , password: md5(password) }).save()
 
   ctx.result = emptyResponse
-
   return next()
 })
 
@@ -30,9 +30,7 @@ router.post('/auth', async (ctx, next) => {
   if (result != null) {
     // 添加token到响应头
     ctx.append('Authorization', `Bearer ${jwt.sign({ sub: result._id, kind: result.kind }, config.secret, { expiresIn: '1 hours' })}`)
-    ctx.result = {
-      kind: result.kind
-    }
+    ctx.result = { kind: result.kind ? 'saler' : 'customer' }
   } else throw new AuthorizationError('Authorization error')
 
   return next()

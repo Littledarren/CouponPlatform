@@ -5,8 +5,12 @@ const { Schema } = require('mongoose')
 
 const schema = new Schema({
     _id: String,
-    kind: String,
-    password: String
+    kind: Number,
+    password: String,
+    hasCoupons: {
+        type: [String],
+        default: []
+    }
 })
 
 schema.set('toJSON', { versionKey: false })
