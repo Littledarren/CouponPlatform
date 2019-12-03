@@ -13,27 +13,36 @@ module.exports = {
    */
   CodedError,
   /**
-   * 拒绝访问 (1)
+   * 身份验证错（401）
+   */
+  AuthorizationError: class AuthorizationError extends CodedError {
+    constructor (message) {
+      super(message, 401)
+    }
+  },
+
+  /**
+   * 拒绝访问 (403)
    */
   ForbiddenError: class ForbiddenError extends CodedError {
     constructor (message) {
-      super(message, 1)
+      super(message, 403)
     }
   },
   /**
-   * 无效的用户输入 (2)
+   * 无效的用户输入 (400)
    */
   InvalidUserInputError: class InvalidUserInputError extends CodedError {
     constructor (message) {
-      super(message, 2)
+      super(message, 400)
     }
   },
   /**
-   * 找不到所请求的资源错误（3）
+   * 找不到所请求的资源错误（404）
    */
   NotFoundError: class NotFoundError extends CodedError {
     constructor (message) {
-      super(message, 3)
+      super(message, 404)
     }
   },
 }
