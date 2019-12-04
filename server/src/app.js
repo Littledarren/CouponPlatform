@@ -13,6 +13,8 @@ const { responseHandler, errorHandler } = require('./lib/response')
 const app = new Koa()
 const router = require('./routes').prefix('/api')
 
+require('http').globalAgent.maxSockets = Infinity
+
 // 先require一次db来连接数据库
 require('./lib/db')
 
