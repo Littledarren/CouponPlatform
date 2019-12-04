@@ -34,7 +34,7 @@ const loggerMiddleware = async (ctx, next) => {
   const remoteAddress = ctx.headers['x-forwarded-for'] || ctx.ip || ctx.ips ||
     (ctx.socket && (ctx.socket.remoteAddress || (ctx.socket.socket && ctx.socket.socket.remoteAddress)))
 
-  logger.info(`${ctx.method.padStart(6)} ${ctx.status} ${ctx.url} - ${remoteAddress} - ${ms}ms`)
+  // logger.info(`${ctx.method.padStart(6)} ${ctx.status} ${ctx.url} - ${remoteAddress} - ${ms}ms`)
 }
 
 module.exports = {
