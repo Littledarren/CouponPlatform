@@ -53,6 +53,12 @@ $ npm i --only=dev
 $ npm run test
 ```
 
+## 压力测试
+
+```shell
+cd server/stressTest && node index.js
+```
+
 ## Troubleshooting
 
 如果运行Node容器时提示连接不到数据库，请检查`server/src/config.js`中`module.exports`的`db`字段：
