@@ -26,6 +26,22 @@ $ npm run start
 
 > 输出`Listening on port 3000`则服务已启动
 
+## 使用容器
+
+### 在本地创建并运行镜像
+
+```shell
+git clone https://github.com/2019FallSem-cdfhlz/CouponPlatform.git coupon-server
+cd coupon-server
+docker build -t coupon-server .
+docker run -it --rm --name coupon-server -p 3000:3000 coupon-server
+```
+
+### 从Dockerhub拉取镜像并运行
+
+```shell
+docker run -it --rm --name coupon-server -p 3000:3000 sysu2019semcdfhlz/coupon-server
+```
 ## 单元测试
 
 ```
