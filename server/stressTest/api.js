@@ -2,16 +2,17 @@ const axios = require('axios');
 
 const config = require('../src/config')
 // For test
-config.root = '172.16.170.90'
+config.root = '127.0.0.1'
 
 const baseURL = `http://${config.root}:${config.port}/api/`;
 
-const req = axios.create({ baseURL, validateStatus: () => true })
+const req = axios.create({ baseURL, validateStatus: status => status >= 200 && status < 400, timeout: 20000 })
 const reqBy = (user) => {
     return axios.create({
         baseURL,
         headers: { authorization: user.auth },
-        validateStatus: () => true
+        validateStatus: status => status >= 200 && status < 400,
+        timeout: 20000
     })
 }
 
