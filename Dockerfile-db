@@ -1,0 +1,2 @@
+FROM mongo:4.2.1-bionic
+COPY ./docker-composes/sysctl.conf /etc/sysctl.conf
