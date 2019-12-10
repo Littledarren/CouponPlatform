@@ -1,6 +1,7 @@
 FROM node:12.13.1-alpine3.10
 WORKDIR /server
 COPY ./server /server/
+COPY ./docker-composes/sysctl.conf /etc/sysctl.conf
 
 RUN sed -i 's/localhost/coupon-db/g' /server/src/config.js \
     && sed -i 's/172.16.170.90/192.168.233.133/g' /server/stressTest/api.js \ 

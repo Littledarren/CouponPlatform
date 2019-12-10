@@ -1,12 +1,1 @@
-version: "3"
-
-services:
-        coupon-server:
-                image: sysu2019semcdfhlz/coupon-server
-                ports:
-                        - "3000:3000"
-                depends_on:
-                        - coupon-db
-        
-        coupon-db:
-                image: mongo:4.2.1-bionic
+1-node-1-db.yml
