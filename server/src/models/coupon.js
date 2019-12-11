@@ -8,7 +8,7 @@ const schema = new Schema({
     type: String,
     required: true
   },
-  coupons: {
+  name: {
     type: String,
     required: true
   },
@@ -24,10 +24,6 @@ const schema = new Schema({
   stock: {
     type: Number,
     required: true
-  },
-  created: {
-    type: Date,
-    default: () => new Date
   }
 })
 
