@@ -8,7 +8,7 @@ const { logger } = require('./logger')
 function responseHandler (ctx) {
   if (ctx.result !== undefined) {
     ctx.type = 'json'
-    ctx.body = ctx.result === emptyResponse ? { errMsg: '' } : ctx.result
+    ctx.body = ctx.result === emptyResponse ? {} : ctx.result
   }
 }
 
