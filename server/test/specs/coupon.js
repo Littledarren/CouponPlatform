@@ -15,7 +15,7 @@ describe('优惠券', function () {
     result1.statusCode.should.be.eql(201, '创建成功')
 
     const result = (await reqBy('jiangzihao0')('users/jiangzihao0/coupons')).body
-    result.data[0].coupons.should.be.eql('test1', '信息获取成功')
+    result.data[0].name.should.be.eql('test1', '信息获取成功')
   })
 
   it('用户不可以创建优惠券', async () => {

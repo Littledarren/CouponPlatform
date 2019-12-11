@@ -15,7 +15,7 @@ describe('用户', () => {
       }
     })
 
-    result.statusCode.should.be.eql(200, '注册成功')
+    result.statusCode.should.be.eql(201, '注册成功')
 
     ;(await req.post(`/auth`, { body: { username: 'test1', password: '123456' } })).statusCode.should.be.eql(200, '登录成功')
   })
