@@ -4,9 +4,9 @@ COPY ./server /server/
 COPY ./docker-composes/sysctl.conf /etc/sysctl.conf
 
 RUN sed -i 's/localhost/coupon-db/g' /server/src/config.js \
-    && sed -i 's/127.0.0.1/192.168.233.133/g' /server/stressTest/api.js \ 
-    && npm i --registry=https://registry.npm.taobao.org
-
+    && npm i --registry=https://registry.npm.taobao.org \
+    && npm i --registry=https://registry.npm.taobao.org -g pm2 
+EXPOSE 3000
 ENTRYPOINT ["docker-entrypoint.sh"]
 
-CMD ["node", "/server/stressTest/index-test.js"]
+CMD ["pm2", "start", "pm2-3.json", "--no-daemon"]
