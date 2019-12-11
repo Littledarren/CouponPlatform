@@ -45,4 +45,12 @@ module.exports = {
       super(message, 404)
     }
   },
+  /**
+   * 未抢到优惠券错误(204)
+   */
+  CannotGetCouponError: class CannotGetCouponError extends CodedError {
+    constructor (message) {
+      super(message, 204)
+    }
+  }
 }

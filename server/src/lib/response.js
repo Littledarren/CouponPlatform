@@ -20,12 +20,11 @@ function errorHandler (ctx, next) {
     if (process.env.NODE_ENV !== 'test') logger.error(err.message.trim())
 
     ctx.body = {
-      code: err.code || -1,
       errMsg: err.message.trim()
     }
 
     // ctx.status = 200      // 保证返回状态是 200, 这样前端不会抛出异常
-    ctx.response.status = err.code || 400
+    ctx.status = err.code || 404
     return Promise.resolve()
   })
 }

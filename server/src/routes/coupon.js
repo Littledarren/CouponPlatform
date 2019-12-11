@@ -5,7 +5,7 @@ const config = require('../config')
 const Coupon = require('../models/coupon')
 const Router = require('koa-router')
 const { emptyResponse } = require('../lib/response')
-const { InvalidUserInputError, NotFoundError, ForbiddenError, AuthorizationError } = require('../lib/errors')
+const { CannotGetCouponError, InvalidUserInputError, NotFoundError, ForbiddenError, AuthorizationError } = require('../lib/errors')
 
 const router = new Router()
 
@@ -21,25 +21,28 @@ router.get('/users/:uid/coupons', async (ctx, next) => {
     state: { user }
   } = ctx
 
-  // 返回该用户/商家自己剩余的优惠券信息
+  let data
   if ((await User.findById(uid)).kind) {
-    ctx.result = await Coupon.find({ username: uid }).skip((page - 1) * PAGE_CNT).limit(PAGE_CNT) || []
+    // 返回商家剩余的优惠券信息
+    data = await Coupon.find({ username: uid }).skip((page - 1) * PAGE_CNT).limit(PAGE_CNT) || []
   } else if (uid == user.sub) {
+    // 返回用户剩余的优惠券信息
     const user = await User.findById(uid)
-    if (user) {
-      ctx.result = await Coupon.find({ coupons: { $in: user.hasCoupons } })
-        .skip((page - 1) * PAGE_CNT)
-        .limit(PAGE_CNT)
-
-      ctx.result = ctx.result.map(coupon => {
+    if (!user) throw new InvalidUserInputError('用户不存在')
+    data = (await Coupon.find({ coupons: { $in: user.hasCoupons } })
+      .skip((page - 1) * PAGE_CNT)
+      .limit(PAGE_CNT))
+      .map(coupon => {
         coupon.username = uid
         coupon.amount = 1
         coupon.left = 1
-        delete coupon.created
         return coupon
       })
-    } else throw new ForbiddenError('用户不存在')
   } else throw new AuthorizationError("Authorization error")
+
+  ctx.status = 200
+  if (!data.length) ctx.status = 204
+  ctx.result = { data }
 
   return next()
 })
@@ -53,22 +56,13 @@ router.patch('/users/:uid/coupons/:cid', async (ctx, next) => {
 
   // if (await Coupon.findOne({ username: user.sub, coupons: cid })) throw new InvalidUserInputError("你已经拥有了该优惠券")
   if (await User.findOne({ _id: user.sub, hasCoupons: { $elemMatch: { $eq: cid } } }))
-    throw new InvalidUserInputError('你已经拥有该优惠券了')
+    throw new CannotGetCouponError('你已经拥有该优惠券了')
 
   const coupon = await Coupon.findOneAndUpdate({ coupons: cid, left: { $gt: 0 } }, { $inc: { left: -1 } })
-  if (!coupon) throw new NotFoundError("优惠券不存在或优惠券已经被抢光了")
-/*
-  await new Coupon({
-    username: user.sub,
-    coupons: coupon.coupons,
-    amount: 1,
-    left: 1,
-    description: coupon.description,
-    stock: coupon.stock
-  }).save()
-*/
-  await User.findByIdAndUpdate(user.sub, { $push: { hasCoupons: coupon.coupons } })
+  if (!coupon) throw new CannotGetCouponError("优惠券不存在或优惠券已经被抢光了")
 
+  await User.findByIdAndUpdate(user.sub, { $push: { hasCoupons: coupon.coupons } })
+  ctx.status = 201
   ctx.result = emptyResponse
 
   return next()
@@ -79,7 +73,7 @@ router.post('/users/:uid/coupons', async (ctx, next) => {
   const { uid } = ctx.params
   const { sub, kind } = ctx.state.user
   if (sub !== uid) throw new AuthorizationError('Authorization error');
-  if (!kind) throw new AuthorizationError('You\'re not a saler')
+  if (!kind) throw new InvalidUserInputError('You\'re not a saler')
 
   const { name, amount, description, stock } = ctx.request.body
 
@@ -92,6 +86,7 @@ router.post('/users/:uid/coupons', async (ctx, next) => {
     stock
   }).save()
 
+  ctx.status = 201
   ctx.result = emptyResponse
 
   return next()
