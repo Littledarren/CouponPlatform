@@ -6,8 +6,13 @@ config.root = '127.0.0.1'
 
 const baseURL = `http://${config.root}:${config.port}/api/`;
 
-const req = axios.create({ baseURL, validateStatus: status => status >= 200 && status < 400, timeout: 20000 })
-const reqBy = (user) => {
+const req = axios.create({ 
+    baseURL, 
+    validateStatus: status => status >= 200 && status < 500, 
+    timeout: 20000 
+})
+
+const reqBy = user => {
     return axios.create({
         baseURL,
         headers: { authorization: user.auth },
@@ -16,12 +21,9 @@ const reqBy = (user) => {
     })
 }
 
-function signUp (user) {
-    const { username, password, kind } = user
-    return req.post(`users`, { username, password, kind })
-}
+const signUp = ({ username, password, kind }) => req.post(`users`, { username, password, kind })
 
-async function signIn (user) {
+const signIn = async user => {
     const { username, password } = user
     const result = await req.post(`auth`, { username, password })
     return Object.assign(user, {
@@ -63,9 +65,10 @@ async function batchRegister(baseName, number, kind, concurrence = 200) {
         return new Promise(async (resolve, reject) => {
             while (users.length) {
                 const user = users.shift()
-                await signUp(user).catch(reject)
-                console.log(`${user.username} registered.`)
-                result.push(user)
+                await signUp(user).then(() => {
+                    console.log(`user ${user.username} is registered.`)
+                    result.push(user)
+                }).catch(err => console.error(err.stack))
             }
             resolve()
         })
@@ -81,5 +84,7 @@ module.exports = {
     getCouponInfo,
     getCoupon,
     createCoupon,
-    batchRegister
+    batchRegister,
+    req,
+    reqBy
 };

@@ -6,17 +6,18 @@ const { signIn, signUp, getCoupon, getCouponInfo, createCoupon, batchRegister } 
 
 async function main () {
     if (!fs.existsSync('users.json')) {
-        await batchRegister('ljl', 42000, 'customer', 600)
+        // 支持从200到6200的并发量
+        await batchRegister('ljl', 99200, 'customer')
     }
         
     const users = require('./users.json')
     
-    const saler = { username: 'jzh', password: '123456', kind: 'saler' }
+    let saler = { username: 'jzh', password: '123456', kind: 'saler' }
     await signUp(saler).catch(console.error)
     saler = await signIn(saler)
 
     let couponName = 'testa'
-    let amount = 30000
+    let amount = 100000
 
     await createCoupon(saler, {
         name: couponName,
@@ -29,10 +30,10 @@ async function main () {
     let step = 200
 
     while (start < users.length) {
-        // await getCouponInfo(saler, saler.username).then(data=>console.log(JSON.stringify(data, null, 2)));    
-        const time_average = Array.from({ length: step })
+        const target_user = users.slice(start, start + step)
+        const time_average = Array.from({ length: target_user.length })
         let err_cnt = 0
-        await Promise.all(users.slice(start, start + step).map((user, i) => {
+        await Promise.all(target_user.map((user, i) => {
             return new Promise(async (resolve, reject) => {
                 const start_time = new Date()
                 try {
@@ -49,18 +50,11 @@ async function main () {
             })
         })).then(() => {
             console.log(`步长: ${step}, 用户平均响应时间: ${time_average.reduce((a, b) => a + b) / step}, 错误计数: ${err_cnt}`)
-            // getCouponInfo(saler, saler.username).then(data=>console.log(JSON.stringify(data, null, 2)));
         })
 
         start += step
         step += 200
     }
-    
-
-    
-    
-    //await getCoupon(users,'lanjialu','jzh','双12');
-   // await getCouponInfo(users,'lanjialu','jzh').then(data=>console.log(JSON.stringify(data, null, 2)));
 }
 
 main()
