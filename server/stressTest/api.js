@@ -16,7 +16,7 @@ const reqBy = user => {
     return axios.create({
         baseURL,
         headers: { authorization: user.auth },
-        validateStatus: status => status >= 200 && status < 400,
+        validateStatus: status => status >= 200 && status < 500,
         timeout: 20000
     })
 }
