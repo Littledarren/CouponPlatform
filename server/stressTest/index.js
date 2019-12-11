@@ -7,7 +7,8 @@ const { signIn, signUp, getCoupon, getCouponInfo, createCoupon, batchRegister } 
 async function main () {
     if (!fs.existsSync('users.json')) {
         // 支持从200到6200的并发量
-        await batchRegister('ljl', 99200, 'customer')
+        // await batchRegister('ljl', 99200, 'customer')
+	await batchRegister('ljl', 42000, 'customer') 
     }
         
     const users = require('./users.json')

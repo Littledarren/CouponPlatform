@@ -75,6 +75,7 @@ async function batchRegister(baseName, number, kind, concurrence = 200) {
     }))
 
     require('fs').writeFileSync('users.json', JSON.stringify(result), 'utf8')
+    console.log(`users.json created.`)
     return result
 }
 
