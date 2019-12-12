@@ -13,9 +13,8 @@ const router = new Router()
 
 /**
  * 用户注册接口
- * @param username {String} 用户名
- * @param password {String} 密码
- * @param kind {String} 用户类型，必须是'saler'和'customer'其中之一
+ * @param {{ username: String, password: String, kind: String }} body 用户名密码和类型
+ * @param {String} kind 用户类型，必须是'saler'和'customer'其中之一
  */
 router.post('/users', async (ctx, next) => {
   // 从请求体中获取用户名、密码和用户类型
@@ -36,9 +35,8 @@ router.post('/users', async (ctx, next) => {
 
 /**
  * 用户登录接口
- * @param username {String} 用户名
- * @param password {String} 密码
- * @responseHeader authorization 用户认证的token，有效期一小时
+ * @param {{ username: String, password: String }} body 用户名和密码
+ * @returns {String} header['authorization']包含关联用户的token，有效期一小时
  */
 router.post('/auth', async (ctx, next) => {
   // 从请求体中获取用户名和密码

@@ -15,9 +15,9 @@ const PAGE_CNT = 20
 
 /**
  * 获取优惠券信息
- * @param uid {String} 用户名
- * @param page {Number} 页码，默认从1开始
- * @returns [Coupon] 相应的优惠券数据
+ * @param {String} uid 用户名
+ * @param {Number} page 页码，默认从1开始
+ * @returns {[Coupon]} 相应的优惠券数据
  */
 router.get('/users/:uid/coupons', async (ctx, next) => {
   // 从请求中获取
@@ -67,8 +67,8 @@ router.get('/users/:uid/coupons', async (ctx, next) => {
 
 /**
  * 用户抢优惠券接口
- * @param uid {String} 商家用户名
- * @param cid {String} 优惠券名称
+ * @param {String} uid 商家用户名
+ * @param {String} cid 优惠券名称
  */
 router.patch('/users/:uid/coupons/:cid', async (ctx, next) => {
   // 从请求中获取
@@ -98,11 +98,8 @@ router.patch('/users/:uid/coupons/:cid', async (ctx, next) => {
 
 /**
  * 新建优惠券接口
- * @param uid {String} 创建者的用户名
- * @param name {String} 优惠券名称
- * @param amount {Number} 优惠券数量
- * @param description {String} 优惠券信息
- * @param stock {Number} 优惠券面额
+ * @param {String} uid 创建者的用户名
+ * @param {Object} body 优惠券信息
  */
 router.post('/users/:uid/coupons', async (ctx, next) => {
   // 获取REST参数
@@ -112,10 +109,16 @@ router.post('/users/:uid/coupons', async (ctx, next) => {
   // 两个用户名必须完全一致否则抛出401异常
   if (sub !== uid) throw new AuthorizationError('Authorization error');
   // 如果用户不是商家类型，则抛出400异常
-  if (!kind) throw new InvalidUserInputError('You\'re not a saler')
+  if (!kind) throw new AuthorizationError('You\'re not a saler')
 
   // 从请求体中解析出优惠券的信息
   const { name, amount, description, stock } = ctx.request.body
+  // 数据验证
+  if (!name || !amount || !stock 
+    || Number.isNaN(+amount) || Number.isNaN(+stock)
+    || +amount <= 0 || +stock <= 0) throw new InvalidUserInputError('Invalid input data')
+  // 重复验证
+  if (await Coupon.findOne({ name })) throw new InvalidUserInputError('Coupon name has been occupied')
 
   // 新建优惠券
   await new Coupon({
