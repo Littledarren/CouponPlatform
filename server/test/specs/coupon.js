@@ -18,6 +18,18 @@ describe('优惠券', function () {
     result.data[0].name.should.be.eql('test1', '信息获取成功')
   })
 
+  it('商家不可以创建重复的优惠券', async function () {
+    const userReq = reqBy('jiangzihao0')
+    const result1 = await userReq.post('users/jiangzihao0/coupons', { body: {
+      name: 'test1',
+      amount: 10000,
+      description: 'hi',
+      stock: 10000
+    }}).catch(err => {
+      err.statusCode.should.be.eql(400, '创建失败')
+    })
+  })
+
   it('用户不可以创建优惠券', async () => {
     const userReq = reqBy('jzh123s0')
     await userReq.post('users/jzh123s0/coupons', { body: {
@@ -26,7 +38,7 @@ describe('优惠券', function () {
       description: 'hi',
       stock: 10000
     }}).catch(err => {
-      err.statusCode.should.be.eql(400, '创建失败')
+      err.statusCode.should.be.eql(401, '创建失败')
     })
 
     await userReq.post('users/jiangzihao0/coupons', { body: {
@@ -35,7 +47,7 @@ describe('优惠券', function () {
       description: 'hi',
       stock: 2000
     }}).catch(err => {
-      err.statusCode.should.be.eql(401, '认证失败')
+      err.statusCode.should.be.eql(401, '创建失败')
     })
   })
 
