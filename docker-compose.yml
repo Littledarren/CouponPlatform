@@ -11,5 +11,4 @@ services:
         
         coupon-db:
                 container_name: coupon-db
-                image: sysu2019semcdfhlz/coupon-db 
-              
+                image: sysu2019semcdfhlz/coupon-db  
