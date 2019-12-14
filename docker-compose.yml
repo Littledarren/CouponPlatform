@@ -5,10 +5,12 @@ services:
                 container_name: coupon-pm2
                 image: sysu2019semcdfhlz/coupon-pm2
                 ports:
-                        - "3000:3000"
+                        - "20080:3000"
                 depends_on:
                         - coupon-db
         
         coupon-db:
                 container_name: coupon-db
                 image: sysu2019semcdfhlz/coupon-db  
+                ports:
+                        - "23306:27017"
