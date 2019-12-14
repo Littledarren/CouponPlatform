@@ -94,6 +94,8 @@ $ npm run test
 
 ### 压力测试
 
+> 要正确运行需要一些小调整，请@Libre-
+
 ```shell
 $ cd server/stressTest && node index.js
 ```
