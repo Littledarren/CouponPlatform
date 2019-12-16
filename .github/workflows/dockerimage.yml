@@ -1,0 +1,20 @@
+name: Docker Image CI
+
+on: [push, commit_comment]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build the Docker image
+      run: |
+        docker build . --file Dockerfile-pm2 --tag sysu2019semcdfhlz/coupon-pm2:latest
+        docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
+        docker push sysu2019semcdfhlz/coupon-pm2
+      env:
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
