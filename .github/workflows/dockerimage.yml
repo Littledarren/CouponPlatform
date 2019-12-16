@@ -12,7 +12,7 @@ jobs:
     - uses: actions/checkout@v1
     - name: Build the Docker image
       run: |
-        docker build . --file Dockerfile-pm2 --tag sysu2019semcdfhlz/coupon-pm2:latest
+        docker build . --file Dockerfile-pm2-github --tag sysu2019semcdfhlz/coupon-pm2:latest
         docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
         docker push sysu2019semcdfhlz/coupon-pm2
       env:
