@@ -12,9 +12,9 @@ jobs:
     - uses: actions/checkout@v1
     - name: Build the Docker image
       run: |
-        docker build . --file Dockerfile-pm2-github --tag sysu2019semcdfhlz/coupon-pm2:latest
+        docker build . --file Dockerfile --tag sysu2019semcdfhlz/coupon-rm:4node
         docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
-        docker push sysu2019semcdfhlz/coupon-pm2
+        docker push sysu2019semcdfhlz/coupon-rm:4node
       env:
         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
