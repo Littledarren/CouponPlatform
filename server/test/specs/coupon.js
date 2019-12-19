@@ -2,6 +2,8 @@
 
 const { req, reqBy } = require('../util')
 
+const delay = ms => new Promise((resolve, reject) => { setTimeout(resolve, ms) })
+
 describe('优惠券', function () {
   it('商家可以创建优惠券', async function () {
     const userReq = reqBy('jiangzihao0')
@@ -51,11 +53,12 @@ describe('优惠券', function () {
     })
   })
 
-  it('用户获取优惠券', async () => {
+  it('用户获取优惠券', async function () {
     const userReq = reqBy('jzh123s0')
     const result1 = await userReq.patch('users/jiangzihao0/coupons/test1')
     result1.statusCode.should.be.eql(201, '获取成功')
-
+    // 延时确保数据写入
+    await delay(2000)
     const result2 = (await userReq('users/jzh123s0/coupons'))
     result2.body.data.length.should.be.eql(1, '信息获取成功')
   })

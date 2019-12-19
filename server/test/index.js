@@ -44,7 +44,12 @@ describe('coupon-platform', function () {
 
     server.listen(+config.port)
 
-    return new Promise((resolve, reject) => resolve())
+    return Promise.resolve()
+  })
+
+  before('启用缓存和消息队列', function () {
+    require('../src/messageQueue')
+    return Promise.resolve()
   })
 
   // describe('执行所有测试', () => {
