@@ -2,6 +2,11 @@
 
 const config = require('../config')
 const mongoose = require('mongoose')
+const Redis = require('ioredis')
+const redis = new Redis(config.redisPort, config.redisAddr)
+
+// 清除缓存
+redis.flushall()
 
 // mongoose 要求替换内置的 Promise
 mongoose.Promise = global.Promise
@@ -19,5 +24,6 @@ const conn = mongoose.createConnection(config.db, {
 const defaultDB = conn.useDb(config.base)
 
 module.exports = {
-  default: defaultDB
+  default: defaultDB,
+  cache: redis
 }

@@ -8,5 +8,8 @@ module.exports = {
   base: 'coupon',
   port: '3000',
   root: '',
-  secret: 'coupon'
+  secret: 'coupon',
+  redisPort: 6379,
+  redisAddr: '127.0.0.1',
+  redisChannel: 'mq'
 }
