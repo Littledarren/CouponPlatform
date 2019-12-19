@@ -1,6 +1,7 @@
 'use strict'
 
 const User = require('../models/user')
+const { cache } = require('../lib/db')
 const config = require('../config')
 const Coupon = require('../models/coupon')
 const Router = require('koa-router')
@@ -9,6 +10,30 @@ const { emptyResponse } = require('../lib/response')
 const { CannotGetCouponError, InvalidUserInputError, NotFoundError, ForbiddenError, AuthorizationError } = require('../lib/errors')
 
 const router = new Router()
+
+const delay = ms => new Promise((resolve, reject) => {
+  setTimeout(resolve, ms)
+})
+
+const getAndCache = async (model, id) => {
+  const data = await cache.hget(model.modelName, id)
+  let result
+  try {
+    result = JSON.parse(data)
+  } catch (err) {
+    console.error(err)
+    console.log(data)
+  }
+  if (result == null) {
+    result = await model.findById(id)
+    if (result) {
+      await cache.hset(model.modelName, id, JSON.stringify(result))
+      result = result._doc
+    }
+
+  }
+  return result
+}
 
 // 分页数量，根据接口文档设定
 const PAGE_CNT = 20
@@ -30,32 +55,35 @@ router.get('/users/:uid/coupons', async (ctx, next) => {
     state: { user: { sub } }
   } = ctx
 
-  let data
+  let data = []
+  let user = await getAndCache(User, uid)
   // 此处根据接口文档要分两种情况
-  if ((await User.findById(uid)).kind) {
-    // 若url指定的用户名身份为商家，则获取该商家的优惠券余量，同时做好分页
-    data = (await Coupon.find({ username: uid }).skip((page - 1) * PAGE_CNT).limit(PAGE_CNT) || [])
-      .map(coupon => {
-        delete coupon._id
-        delete coupon.username
-        return coupon
-      })
+  if (user && user.kind) {
+    // 尝试从cache的缓存中读取用户数据
+    for (const cid of user.hasCoupons.slice((page - 1) * PAGE_CNT, PAGE_CNT)) {
+      data.push(await getAndCache(Coupon, cid))
+    }
+    data = data.map(coupon => {
+      coupon.name = coupon._id
+      delete coupon._id
+      delete coupon.username
+      return coupon
+    })
   } else if (uid == sub) {
-    // 否则url指定的用户名必须等于token解析获得的用户名
-    const user = await User.findById(uid)
     // 若用户不存在则抛出400异常
     if (!user) throw new InvalidUserInputError('用户不存在')
-    // 否则查找满足优惠券名称为用户的hasCoupons字段中的元素的记录，同时做好分页
-    data = (await Coupon.find({ name: { $in: user.hasCoupons } })
-      .skip((page - 1) * PAGE_CNT)
-      .limit(PAGE_CNT))
-      .map(coupon => { // 由于获取出来的是商家的信息，要进行一定的修改，屏蔽一些字段
-        delete coupon._id
-        delete coupon.username
-        delete coupon.amount
-        delete coupon.left
-        return coupon
-      })
+    // 尝试从cache读取缓存数据
+    for (const cid of user.hasCoupons.slice((page - 1) * PAGE_CNT, PAGE_CNT)) {
+      data.push(await getAndCache(Coupon, cid))
+    }
+    data = data.map(coupon => {
+      coupon.name = coupon._id
+      delete coupon._id
+      delete coupon.username
+      delete coupon.amount
+      delete coupon.left
+      return coupon
+    })
   } else throw new AuthorizationError("Authorization error") // 两种情况都不满足则抛出401异常
   // 设置响应状态码
   ctx.status = data.length ? 200 : 204
@@ -80,14 +108,23 @@ router.patch('/users/:uid/coupons/:cid', async (ctx, next) => {
   } = ctx
 
   // 首先检查用户是否已持有该优惠券，若持有则抛出204异常
-  if (await User.findOne({ _id: sub, hasCoupons: { $elemMatch: { $eq: cid } } }))
-    throw new CannotGetCouponError('你已经拥有该优惠券了')
-  // 否则去更新该优惠券，在查询条件中需要设置优惠券的left字段要满足大于0，然后对left进行减1的更新操作
-  const coupon = await Coupon.findOneAndUpdate({ name: cid, left: { $gt: 0 } }, { $inc: { left: -1 } })
-  // 若上一步没有更新到任何数据，则说明优惠券不存在或者已经被抢光了，抛出204异常
-  if (!coupon) throw new CannotGetCouponError("优惠券不存在或优惠券已经被抢光了")
+  let user = await getAndCache(User, sub)
+  if (user.hasCoupons.includes(cid)) throw new CannotGetCouponError('你已经拥有该优惠券了')
+  // 每5ms尝试一次加锁
+  while (!await cache.setnx(cid, sub)) await delay(5)
+  // 从缓存获取数据
+  let coupon = await getAndCache(Coupon, cid)
+  if (!coupon || !coupon.left) throw new CannotGetCouponError("优惠券不存在或已经被抢完了！")
+  --coupon.left
+  // 写回cache
+  await cache.hset('Coupon', cid, JSON.stringify(coupon))
+  // 释放锁
+  await cache.del(cid)
+
+  // 将事件添加到消息队列
+  cache.publish(config.redisChannel, JSON.stringify({ customer: sub, coupon: coupon._id }))
+
   // 在用户的hasCoupons字段中添加该优惠券的名称
-  await User.findByIdAndUpdate(sub, { $push: { hasCoupons: coupon.name } })
   // 设置响应状态码
   ctx.status = 201
   // 设置响应体为空
@@ -118,17 +155,22 @@ router.post('/users/:uid/coupons', async (ctx, next) => {
     || Number.isNaN(+amount) || Number.isNaN(+stock)
     || +amount <= 0 || +stock <= 0) throw new InvalidUserInputError('Invalid input data')
   // 重复验证
-  if (await Coupon.findOne({ name })) throw new InvalidUserInputError('Coupon name has been occupied')
+  if (await Coupon.findById(name)) throw new InvalidUserInputError('Coupon name has been occupied')
 
   // 新建优惠券
   await new Coupon({
+    _id: name,
     username: uid,
-    name,
     amount,
     left: amount,
     description,
     stock
   }).save()
+  // 更新商家信息
+  const user = await User.findByIdAndUpdate(uid, { $push: { hasCoupons: [name] } }, { new: true })
+  // 同步更新缓存
+  const str = JSON.stringify(user)
+  await cache.hset('User', uid, str)
 
   // 设置响应状态码
   ctx.status = 201

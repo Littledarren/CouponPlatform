@@ -4,14 +4,17 @@ const db = require('../lib/db').default
 const { Schema } = require('mongoose')
 
 const schema = new Schema({
+  _id: String,
   username: {
     type: String,
     required: true
   },
+  /*
   name: {
     type: String,
+    unique: true,
     required: true
-  },
+  },*/
   amount: {
     type: Number,
     default: 1
