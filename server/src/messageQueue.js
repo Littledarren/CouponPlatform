@@ -46,7 +46,7 @@ const resolve = async () => {
   // 并发持久化数据，并更新缓存
   return Promise.all(Object.keys(merged).map(coupon => new Promise(async (resolve, reject) => {
     // 更新优惠券数量
-    await Coupon.findByIdAndUpdate(coupon, { $inc: { left: merged[coupon].length } })
+    await Coupon.findByIdAndUpdate(coupon, { $inc: { left: merged[coupon].length * -1 } })
     // 更新用户数据
     await User.updateMany({ _id: { $in: merged[coupon] } }, { $push: { hasCoupons: [coupon] } }, { new: true })
     const users = await User.find({ _id: { $in: merged[coupon] } })
