@@ -11,7 +11,7 @@
       "skipFiles": [
         "<node_internals>/**"
       ],
-      "program": "${workspaceFolder}\\bin\\www"
+      "program": "${workspaceFolder}/bin/www"
     },
     {
       "type": "node",
@@ -30,6 +30,16 @@
         "${workspaceRoot}/test/index.js"
       ],
       "internalConsoleOptions": "openOnSessionStart"
-    }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Stress Test",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "cwd": "${workspaceFolder}/stressTest",
+      "program": "${workspaceFolder}/stressTest/index.js"
+    },
   ]
 }
