@@ -1,15 +1,26 @@
 {
   "apps": [
-      {
-          "name": "couponPlatform",
-          "script": "bin/www",
-          "env": {
-              "NODE_ENV": "production"
-          },
-          "instances": 4,
-          "exec_mode": "cluster",
-          "autorestart": true,
-          "node-args": "--nouse-idle-notification --gc_global --max-old-space-size=2048 --max-new-space-size=1024"
-      }
+    {
+      "name": "couponPlatform",
+      "script": "bin/www",
+      "env": {
+        "NODE_ENV": "production"
+      },
+      "instances": 4,
+      "exec_mode": "cluster",
+      "autorestart": true,
+      "node-args": "--nouse-idle-notification --gc_global --max-old-space-size=2048 --max-new-space-size=1024"
+    },
+    {
+      "name": "couponPlatform-MessageQueue",
+      "script": "src/messageQueue.js",
+      "env": {
+        "NODE_ENV": "production"
+      },
+      "instances": 1,
+      "exec_mode": "fork",
+      "autorestart": true,
+      "node-args": "--nouse-idle-notification --gc_global --max-old-space-size=1024 --max-new-space-size=1024"
+    }
   ]
 }
