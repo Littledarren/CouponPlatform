@@ -1,1 +1,1 @@
-dockerfiles/Dockerfile-rm-3
+dockerfiles/Dockerfile-rm

@@ -2,15 +2,20 @@ version: "3"
 
 services:
         coupon-server:
-                container_name: coupon-pm2
-                image: sysu2019semcdfhlz/coupon-pm2
+                container_name: coupon-server
+                image: sysu2019semcdfhlz/coupon-rm
                 ports:
                         - "20080:3000"
                 depends_on:
                         - coupon-db
+                        - coupon-redis
         
         coupon-db:
                 container_name: coupon-db
                 image: sysu2019semcdfhlz/coupon-db  
                 ports:
                         - "23306:27017"
+
+        coupon-redis:
+                container_name: coupon-redis
+                image: redis:5.0.7-alpine3.10

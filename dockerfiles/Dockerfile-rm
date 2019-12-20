@@ -11,4 +11,4 @@ VOLUME /server
 EXPOSE 3000
 ENTRYPOINT ["docker-entrypoint.sh"]
 
-CMD ["./run.sh", "2"]
+CMD ["./run.sh"]
