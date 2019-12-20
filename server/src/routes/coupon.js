@@ -15,6 +15,15 @@ const delay = ms => new Promise((resolve, reject) => {
   setTimeout(resolve, ms)
 })
 
+// 分页数量，根据接口文档设定
+const PAGE_CNT = 20
+
+/**
+ * 在Model中读取记录
+ * @param { Mongoose.Model } model Mongo Model
+ * @param { Any } id Document Key
+ * @returns { Object } Data
+ */
 const getAndCache = async (model, id) => {
   let result = await cache.hget(model.modelName, id)
   if (result == null) {
@@ -26,9 +35,6 @@ const getAndCache = async (model, id) => {
   }
   return JSON.parse(result)
 }
-
-// 分页数量，根据接口文档设定
-const PAGE_CNT = 20
 
 /**
  * 获取优惠券信息
@@ -51,12 +57,7 @@ router.get('/users/:uid/coupons', async (ctx, next) => {
   let user = await getAndCache(User, uid)
   // 此处根据接口文档要分两种情况
   if (user && user.kind) {
-    // 尝试从cache的缓存中读取用户数据
-    /*
-    for (const cid of user.hasCoupons.slice((page - 1) * PAGE_CNT, PAGE_CNT)) {
-      data.push(await getAndCache(Coupon, cid))
-    }
-    */
+    // 尝试从cache读取优惠券数据
     await Promise.all(user.hasCoupons.slice((page - 1) * PAGE_CNT, PAGE_CNT)
       .map((cid, i) => getAndCache(Coupon, cid).then(coupon => {
         data[i] = coupon
@@ -70,10 +71,11 @@ router.get('/users/:uid/coupons', async (ctx, next) => {
   } else if (uid == sub) {
     // 若用户不存在则抛出400异常
     if (!user) throw new InvalidUserInputError('用户不存在')
-    // 尝试从cache读取缓存数据
-    for (const cid of user.hasCoupons.slice((page - 1) * PAGE_CNT, PAGE_CNT)) {
-      data.push(await getAndCache(Coupon, cid))
-    }
+    // 尝试从cache读取优惠券数据
+    await Promise.all(user.hasCoupons.slice((page - 1) * PAGE_CNT, PAGE_CNT)
+      .map((cid, i) => getAndCache(Coupon, cid).then(coupon => {
+        data[i] = coupon
+      })))
     data = data.map(coupon => {
       coupon.name = coupon._id
       delete coupon._id
@@ -115,14 +117,11 @@ router.patch('/users/:uid/coupons/:cid', async (ctx, next) => {
   if (!coupon || !coupon.left) throw new CannotGetCouponError("优惠券不存在或已经被抢完了！")
   --coupon.left
   // 写回cache
-  await cache.hset('Coupon', cid, JSON.stringify(coupon))
-  // 释放锁
-  await cache.del(cid)
+  await cache.pipeline().hset('Coupon', cid, JSON.stringify(coupon)).del(cid).exec()
 
   // 将事件添加到消息队列
   cache.publish(config.redisChannel, JSON.stringify({ customer: sub, coupon: coupon._id }))
 
-  // 在用户的hasCoupons字段中添加该优惠券的名称
   // 设置响应状态码
   ctx.status = 201
   // 设置响应体为空
