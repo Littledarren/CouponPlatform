@@ -9,7 +9,7 @@ const baseURL = `http://${config.root}:${config.port}/api/`;
 const req = axios.create({ 
     baseURL, 
     validateStatus: status => status >= 200 && status < 500, 
-    timeout: 20000 
+    // timeout: 20000 
 })
 
 const reqBy = user => {
@@ -17,7 +17,7 @@ const reqBy = user => {
         baseURL,
         headers: { authorization: user.auth },
         validateStatus: status => status >= 200 && status < 500,
-        timeout: 20000
+        // timeout: 20000
     })
 }
 
