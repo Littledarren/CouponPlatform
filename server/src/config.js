@@ -15,6 +15,6 @@ module.exports = {
   // 消息队列配置
   messageQueueOptions: {
     maxLength: 200,
-    resolveCycle: 1000
+    resolveCycle: 3000
   }
 }
