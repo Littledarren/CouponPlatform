@@ -12,8 +12,8 @@ const redis = new Redis(config.redisPort, config.redisAddr)
 redis.subscribe(config.redisChannel)
 
 let queue = []
-const QUEUE_MAX_LENGTH = 200
-const RESOLVE_CYCLE = 1000
+const QUEUE_MAX_LENGTH = config.messageQueueOptions.maxLength || 200
+const RESOLVE_CYCLE = config.messageQueueOptions.resolveCycle || 1000
 
 redis.on('message', (channel, message) => {
   addTask(JSON.parse(message))

@@ -2,6 +2,13 @@
 
 const fs = require('fs')
 
+// 在此处修改消息队列的设置
+const config = require('../src/config')
+// 队列最大长度
+config.messageQueueOptions.maxLength = 200
+// 轮询周期(多少ms处理一次队列)
+config.messageQueueOptions.resolveCycle = 1000
+
 const { signIn, signUp, getCoupon, getCouponInfo, createCoupon, batchRegister } = require('./api')
 
 const delay = ms => new Promise((resolve, reject) => { setTimeout(resolve, ms) })
@@ -10,7 +17,7 @@ async function main () {
     if (!fs.existsSync('users.json')) {
         // 支持从200到6200的并发量
         // await batchRegister('ljl', 99200, 'customer')
-	await batchRegister('ljl', 42000, 'customer') 
+	    await batchRegister('ljl', 42000, 'customer') 
     }
         
     const users = require('./users.json')
@@ -49,9 +56,9 @@ async function main () {
                     ++err_cnt
                 }
                 time_average[i] = new Date() - start_time
-                resolve(30000)
+                resolve()
             })
-        })).then(delay).then(() => {
+        })).then(() => delay(30000)).then(() => {
             console.log(`步长: ${step}, 用户平均响应时间: ${time_average.reduce((a, b) => a + b) / step}, 错误计数: ${err_cnt}`)
         })
 

@@ -11,5 +11,10 @@ module.exports = {
   secret: 'coupon',
   redisPort: 6379,
   redisAddr: '127.0.0.1',
-  redisChannel: 'mq'
+  redisChannel: 'mq',
+  // 消息队列配置
+  messageQueueOptions: {
+    maxLength: 200,
+    resolveCycle: 1000
+  }
 }
