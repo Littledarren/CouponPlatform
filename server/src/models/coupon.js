@@ -9,12 +9,6 @@ const schema = new Schema({
     type: String,
     required: true
   },
-  /*
-  name: {
-    type: String,
-    unique: true,
-    required: true
-  },*/
   amount: {
     type: Number,
     default: 1
@@ -32,5 +26,9 @@ const schema = new Schema({
 
 schema.set('toJSON', { versionKey: false })
 schema.set('toObject', { versionKey: false })
+
+schema.methods.toCache = function () {
+  return JSON.stringify(this)
+}
 
 module.exports = db.model('Coupon', schema)

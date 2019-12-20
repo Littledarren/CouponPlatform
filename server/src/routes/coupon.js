@@ -16,23 +16,15 @@ const delay = ms => new Promise((resolve, reject) => {
 })
 
 const getAndCache = async (model, id) => {
-  const data = await cache.hget(model.modelName, id)
-  let result
-  try {
-    result = JSON.parse(data)
-  } catch (err) {
-    console.error(err)
-    console.log(data)
-  }
+  let result = await cache.hget(model.modelName, id)
   if (result == null) {
     result = await model.findById(id)
     if (result) {
-      await cache.hset(model.modelName, id, JSON.stringify(result))
-      result = result._doc
+      result = result.toCache()
+      await cache.hset(model.modelName, id, result)
     }
-
   }
-  return result
+  return JSON.parse(result)
 }
 
 // 分页数量，根据接口文档设定
@@ -60,9 +52,15 @@ router.get('/users/:uid/coupons', async (ctx, next) => {
   // 此处根据接口文档要分两种情况
   if (user && user.kind) {
     // 尝试从cache的缓存中读取用户数据
+    /*
     for (const cid of user.hasCoupons.slice((page - 1) * PAGE_CNT, PAGE_CNT)) {
       data.push(await getAndCache(Coupon, cid))
     }
+    */
+    await Promise.all(user.hasCoupons.slice((page - 1) * PAGE_CNT, PAGE_CNT)
+      .map((cid, i) => getAndCache(Coupon, cid).then(coupon => {
+        data[i] = coupon
+      })))
     data = data.map(coupon => {
       coupon.name = coupon._id
       delete coupon._id
@@ -169,8 +167,7 @@ router.post('/users/:uid/coupons', async (ctx, next) => {
   // 更新商家信息
   const user = await User.findByIdAndUpdate(uid, { $push: { hasCoupons: [name] } }, { new: true })
   // 同步更新缓存
-  const str = JSON.stringify(user)
-  await cache.hset('User', uid, str)
+  await cache.hset('User', uid, user.toCache())
 
   // 设置响应状态码
   ctx.status = 201
