@@ -36,15 +36,16 @@ function createCoupon (user, { name, amount, description, stock }) {
 
 async function getCouponInfo(user, username) {
     let page = 1
-    let data = []
+    let data = [], result
     // 把每一页的结果都请求了
     do {
-        var result = await reqBy(user)(`users/${username}/coupons?page=${page}`)
-        data.concat(result.data);
-        ++page;
-    // 如果请求的结果数量等于20，说明可能还有下一页
-    } while (result.data.length == 20)
-    return data;
+        result = await reqBy(user)(`users/${username}/coupons?page=${page}`)
+        if (result.status === 200) {
+            data = data.concat(result.data.data)
+        }
+        ++page
+    } while (result.status === 200)
+    return data
 }
 
 function getCoupon(user, username, name){
