@@ -14,6 +14,8 @@ for (let i = 0; i < 10; ++i) {
   })
 }
 
+salers[1].hasCoupons = ['来抢啊啊啊啊啊']
+
 for (let i = 0; i < 1000; ++i) {
   customers.push({
     _id: `jzh123s${i}`,

@@ -16,4 +16,8 @@ const schema = new Schema({
 schema.set('toJSON', { versionKey: false })
 schema.set('toObject', { versionKey: false })
 
+schema.methods.toCache = function () {
+    return JSON.stringify({ _id: this._id, hasCoupons: this.hasCoupons, kind: this.kind })
+}
+
 module.exports = db.model('User', schema)

@@ -4,11 +4,8 @@ const db = require('../lib/db').default
 const { Schema } = require('mongoose')
 
 const schema = new Schema({
+  _id: String,
   username: {
-    type: String,
-    required: true
-  },
-  name: {
     type: String,
     required: true
   },
@@ -29,5 +26,9 @@ const schema = new Schema({
 
 schema.set('toJSON', { versionKey: false })
 schema.set('toObject', { versionKey: false })
+
+schema.methods.toCache = function () {
+  return JSON.stringify(this)
+}
 
 module.exports = db.model('Coupon', schema)

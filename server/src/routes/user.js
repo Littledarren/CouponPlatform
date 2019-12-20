@@ -7,7 +7,11 @@ const config = require('../config')
 const Router = require('koa-router')
 const { emptyResponse } = require('../lib/response')
 // 路径/src/server/lib/errors中定义了各种错误类型，其中错误类型的code属性将决定返回的状态码
+<<<<<<< HEAD
 const { AuthorizationError, InvalidUserInputError } = require('../lib/errors')
+=======
+const { AuthorizationError, InvalidUserInputError } = require('../lib/errors')
+>>>>>>> dev
 
 const router = new Router()
 

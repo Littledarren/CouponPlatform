@@ -24,7 +24,7 @@ function errorHandler (ctx, next) {
     }
 
     // ctx.status = 200      // 保证返回状态是 200, 这样前端不会抛出异常
-    ctx.status = err.code || 404
+    ctx.status = err.code || 500
     return Promise.resolve()
   })
 }
