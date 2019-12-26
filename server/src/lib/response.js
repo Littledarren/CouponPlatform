@@ -17,7 +17,7 @@ function responseHandler (ctx) {
 function errorHandler (ctx, next) {
   return next().catch(err => {
     err = err.error || err
-    logger.error(err.message.trim())
+    // logger.error(err.message.trim())
 
     ctx.body = {
       errMsg: err.message.trim()
