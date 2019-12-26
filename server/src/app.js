@@ -18,7 +18,7 @@ require('http').globalAgent.maxSockets = Infinity
 // 先require一次db来连接数据库
 require('./lib/db')
 
-if (process.env.NODE_ENV !== 'test') app.use(loggerMiddleware)
+// app.use(loggerMiddleware)
 app.use(errorHandler)
 app.use(bodyParser())
 // app.use(rewrite(`/${config.base}/`, '/$1'))

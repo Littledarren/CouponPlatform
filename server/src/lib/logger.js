@@ -15,12 +15,16 @@ if (!fs.existsSync(logsDir)) {
 log4js.configure({
   appenders: {
     console: { type: 'console' },
+    out: { type: 'stdout' },
     dateFile: { type: 'dateFile', filename: config.log, pattern: '-yyyy-MM-dd' }
   },
 
   categories: {
-    default: { appenders: ['console', 'dateFile'], level: 'info' }
-  }
+    default: { appenders: ['out', 'console', 'dateFile'], level: 'info' }
+  },
+
+  pm2: true,
+  pm2InstanceVar: 'INSTANCE_ID'
 })
 
 const logger = log4js.getLogger('default')
@@ -34,7 +38,7 @@ const loggerMiddleware = async (ctx, next) => {
   const remoteAddress = ctx.headers['x-forwarded-for'] || ctx.ip || ctx.ips ||
     (ctx.socket && (ctx.socket.remoteAddress || (ctx.socket.socket && ctx.socket.socket.remoteAddress)))
 
-  // logger.info(`${ctx.method.padStart(6)} ${ctx.status} ${ctx.url} - ${remoteAddress} - ${ms}ms`)
+  logger.info(`${ctx.method.padStart(6)} ${ctx.status} ${ctx.url} - ${remoteAddress} - ${ms}ms`)
 }
 
 module.exports = {
