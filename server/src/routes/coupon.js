@@ -114,7 +114,11 @@ router.patch('/users/:uid/coupons/:cid', async (ctx, next) => {
   while (!await cache.setnx(cid, sub)) await delay(5)
   // 从缓存获取数据
   let coupon = await getAndCache(Coupon, cid)
-  if (!coupon || !coupon.left) throw new CannotGetCouponError("优惠券不存在或已经被抢完了！")
+  if (!coupon || !coupon.left) {
+    // 抛出异常之前要先把锁放咯
+    await cache.del(cid)
+    throw new CannotGetCouponError("优惠券不存在或已经被抢完了！")
+  }
   --coupon.left
   // 写回cache
   await cache.pipeline().hset('Coupon', cid, JSON.stringify(coupon)).del(cid).exec()
