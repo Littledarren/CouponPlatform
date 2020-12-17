@@ -110,8 +110,8 @@ router.patch('/users/:uid/coupons/:cid', async (ctx, next) => {
   // 首先检查用户是否已持有该优惠券，若持有则抛出204异常
   let user = await getAndCache(User, sub)
   if (user.hasCoupons.includes(cid)) throw new CannotGetCouponError('你已经拥有该优惠券了')
-  // 每5ms尝试一次加锁
-  while (!await cache.setnx(cid, sub)) await delay(5)
+  // 轮询加锁
+  while (!await cache.setnx(cid, sub)) await delay(300)
   // 从缓存获取数据
   let coupon = await getAndCache(Coupon, cid)
   if (!coupon || !coupon.left) {
