@@ -8,6 +8,7 @@ const Router = require('koa-router')
 const { emptyResponse } = require('../lib/response')
 // 路径/src/server/lib/errors中定义了各种错误类型，其中错误类型的code属性将决定返回的状态码
 const { CannotGetCouponError, InvalidUserInputError, NotFoundError, ForbiddenError, AuthorizationError } = require('../lib/errors')
+const user = require('../models/user')
 
 const router = new Router()
 
@@ -108,23 +109,21 @@ router.patch('/users/:uid/coupons/:cid', async (ctx, next) => {
   } = ctx
 
   // 首先检查用户是否已持有该优惠券，若持有则抛出204异常
-  let user = await getAndCache(User, sub)
-  if (user.hasCoupons.includes(cid)) throw new CannotGetCouponError('你已经拥有该优惠券了')
-  // 轮询加锁
-  while (!await cache.setnx(cid, sub)) await delay(300)
-  // 从缓存获取数据
-  let coupon = await getAndCache(Coupon, cid)
-  if (!coupon || !coupon.left) {
-    // 抛出异常之前要先把锁放咯
-    await cache.del(cid)
-    throw new CannotGetCouponError("优惠券不存在或已经被抢完了！")
-  }
-  --coupon.left
-  // 写回cache
-  await cache.pipeline().hset('Coupon', cid, JSON.stringify(coupon)).del(cid).exec()
+  const currentUser = await User.findById(sub)
+  if (currentUser.hasCoupons.includes(cid)) throw new CannotGetCouponError('你已经拥有该优惠券了')
 
-  // 将事件添加到消息队列
-  cache.publish(config.redisChannel, JSON.stringify({ customer: sub, coupon: coupon._id }))
+  // 更新coupon剩余数量
+  await Coupon.updateOne({ _id: cid, left: { $gte: 1 } }, { $inc: { left: -1 } }, { runValidators: true }, (err, raw) => {
+    if (err) {
+      console.error(err)
+      return
+    }
+    if (raw.n == 1) { // 成功
+      currentUser.hasCoupons.push(cid)
+      // 异步保存
+      currentUser.save();
+    }
+  })
 
   // 设置响应状态码
   ctx.status = 201
@@ -152,7 +151,7 @@ router.post('/users/:uid/coupons', async (ctx, next) => {
   // 从请求体中解析出优惠券的信息
   const { name, amount, description, stock } = ctx.request.body
   // 数据验证
-  if (!name || !amount || !stock 
+  if (!name || !amount || !stock
     || Number.isNaN(+amount) || Number.isNaN(+stock)
     || +amount <= 0 || +stock <= 0) throw new InvalidUserInputError('Invalid input data')
   // 重复验证
