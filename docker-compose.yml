@@ -3,16 +3,16 @@ version: "3"
 services:
         coupon-server:
                 container_name: coupon-server
-                image: sysu2019semcdfhlz/coupon-rm:4node
+                image: littledarren/coupon_server:optimize-lock-interval
                 ports:
-                        - "20080:3000"
+                        - "3000:3000"
                 depends_on:
                         - coupon-db
                         - coupon-redis
         
         coupon-db:
                 container_name: coupon-db
-                image: sysu2019semcdfhlz/coupon-db  
+                image: littledarren/coupon_db  
                 ports:
                         - "23306:27017"
 
