@@ -9,13 +9,28 @@ services:
                 depends_on:
                         - coupon-db
                         - coupon-redis
+                deploy:
+                  resources:
+                    limits:
+                      cpus : '4'
+                      memory : 2G
         
         coupon-db:
                 container_name: coupon-db
                 image: littledarren/coupon_db  
                 ports:
                         - "23306:27017"
+                deploy:
+                  resources:
+                    limits:
+                      cpus : '1'
+                      memory : 2G
 
         coupon-redis:
                 container_name: coupon-redis
                 image: redis:5.0.7-alpine3.10
+                deploy:
+                  resources:
+                    limits:
+                      cpus : '1'
+                      memory : 2G
