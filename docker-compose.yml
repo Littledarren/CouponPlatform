@@ -5,17 +5,32 @@ services:
                 container_name: coupon-server
                 image: sysu2019semcdfhlz/coupon-rm:4node
                 ports:
-                        - "20080:3000"
+                        - "3000:3000"
                 depends_on:
                         - coupon-db
                         - coupon-redis
+                deploy:
+                  resources:
+                    limits:
+                      cpus : '4'
+                      memory : 2G
         
         coupon-db:
                 container_name: coupon-db
                 image: sysu2019semcdfhlz/coupon-db  
                 ports:
                         - "23306:27017"
+                deploy:
+                  resources:
+                    limits:
+                      cpus : '1'
+                      memory : 2G
 
         coupon-redis:
                 container_name: coupon-redis
                 image: redis:5.0.7-alpine3.10
+                deploy:
+                  resources:
+                    limits:
+                      cpus : '1'
+                      memory : 2G
