@@ -1,12 +1,20 @@
 #!/bin/bash
 
+
+# server镜像名称
+serverIMG="littledarren/coupon_server"
+# 数据库镜像名称
+dbIMG="littledarren/coupon_db"
+# test镜像名称
+testIMG="littledarren/coupon_test"
+
 set -e
 cd .. &&  echo "当前工作目录 `pwd`" 
-echo "BUILDING... littledarren/coupon_server:optimize-lock-interval"
-docker build -t littledarren/coupon_server:optimize-lock-interval -f ./Dockerfile .
-echo "BUIDING... littledarren/coupon_db"
-docker build -t littledarren/coupon_db -f ./dockerfiles/Dockerfile-db .
-echo "BUIDING... littledarren/coupon_test"
-docker build -t littledarren/coupon_test -f ./dockerfiles/Dockerfile-test .
+echo "BUILDING... ${serverIMG}"
+docker build -t ${serverIMG} -f ./Dockerfile .
+echo "BUIDING... ${dbIMG}"
+docker build -t ${dbIMG} -f ./dockerfiles/Dockerfile-db .
+echo "BUIDING... ${testIMG}"
+docker build -t ${testIMG} -f ./dockerfiles/Dockerfile-test .
 
-echo "然后就能用了，如果发现云端的镜像不太对劲，请联系我"
+echo "执行完毕"

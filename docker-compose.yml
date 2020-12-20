@@ -1,14 +1,19 @@
 version: "3"
 
+# 默认会创建一个私有的docker网络,并支持服务发现，即绑定服务名到ip
 services:
         coupon-server:
                 container_name: coupon-server
-                image: littledarren/coupon_server:optimize-lock-interval
+                # 使用服务镜像,暴露3000端口到主机端。测试的时候直接连接本地的3000端口即可
+                image: littledarren/coupon_server
+                  #使用下面的命令保证容器执行但不开启www服务
+                  #command: tail -f /dev/null 
                 ports:
                         - "3000:3000"
                 depends_on:
                         - coupon-db
                         - coupon-redis
+                # 做一些资源上的限制，保证测试代码不影响服务器性能
                 deploy:
                   resources:
                     limits:

@@ -1,14 +1,20 @@
+# 从12.13.1 LTS版本的nodejs开始构建
 FROM node:12.13.1-alpine3.10
 WORKDIR /server
+# 把源代码复制到工作目录
 COPY ./server /server/
+# 优化TCP连接
 COPY ./docker-composes/sysctl.conf /etc/sysctl.conf
 
+# 修改地址到服务名,并安装pm2
 RUN sed -i 's/localhost/coupon-db/g' /server/src/config.js \
     && sed -i 's/127.0.0.1/coupon-redis/g' /server/src/config.js \
     && npm --registry=http://mirrors.cloud.tencent.com/npm/ i  \
     && npm --registry=http://mirrors.cloud.tencent.com/npm/ i -g pm2 
+# 创建挂载点
 VOLUME /server
 EXPOSE 3000
 ENTRYPOINT ["docker-entrypoint.sh"]
 
+# 使用脚本启动
 CMD ["./run.sh"]

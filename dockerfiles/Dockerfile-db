@@ -1,3 +1,6 @@
+# 使用4.2.1的官方mongoDB开始构建
 FROM mongo:4.2.1-bionic
+# 优化tcp连接
 COPY ./docker-composes/sysctl.conf /etc/sysctl.conf
+# 启动不带有日志功能的MongoDB
 CMD ["mongod", "--nojournal"]
