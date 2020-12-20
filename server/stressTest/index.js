@@ -72,11 +72,13 @@ async function main () {
             const max = Math.max(...time)
             const nowLeft = (await getCouponInfo(saler, saler.username)).map(coupon => coupon.left)
             console.log(`并发量: ${step}, 用户平均响应时间: ${average}, 最小响应时间: ${min}, 最长响应时间: ${max}, 错误计数: ${err_cnt}`)
+            const succ_cnt_total = succ_cnt.reduce((a, b) => a+b)
             for (let i = 0; i < couponCnt; ++i) {
                 if (couponLeft[i] - nowLeft[i] !== succ_cnt[i]) {
-                    console.log(`优惠券[${couponBaseName}${i}]减少: ${couponLeft[i] - nowLeft[i]}, 成功获取优惠券人数: ${succ_cnt[i]}`)
+                    console.log(`优惠券[${couponBaseName}${i}]减少: ${couponLeft[i]}, ${nowLeft[i]}, 成功获取优惠券人数: ${succ_cnt[i]}`)
                 }
             }
+            console.log(`总计成功发放 ${succ_cnt_total}张优惠券`)
         }).then(() => { 
             const ms = 10000
             console.log(`等待${ms}ms完成持久化`)
