@@ -53,20 +53,15 @@ async function main () {
         await Promise.all(target_user.map((user, i) => {
             return new Promise(async (resolve, reject) => {
                 const couponIndex = Math.floor(Math.random() * couponCnt)
-                let rand_try = Math.floor(Math.random() * 10)
                 const start_time = new Date()
                 try {
                     user = (await signIn(user))
                     // 1.
                     login_times[i] = new Date() - start_time
-                    while (rand_try--) await getCouponInfo(user, saler.username)
-                    // 2.
-                    getCouponInfo_times[i] =  new Date() - start_time - login_times[i]
                     const req = await getCoupon(user, saler.username, `${couponBaseName}${couponIndex}`)
                     if (req.status === 201) ++succ_cnt[couponIndex]
-                    // 3.
-                    getCoupon_times[i] =  new Date() - start_time - login_times[i] - getCouponInfo_times[i]
-                    await getCouponInfo(user, user.username)
+                    // 2.
+                    getCoupon_times[i] =  new Date() - start_time - login_times[i]
                 } catch (err) {
                     console.log(err.stack)
                     ++err_cnt
@@ -80,12 +75,11 @@ async function main () {
             const min = Math.max(...time)
             const max = Math.min(...time)
             const login_time = Math.floor(login_times.reduce((a, b) => a + b) / step)
-            const getCouponInfo_time = Math.floor(getCouponInfo_times.reduce((a, b) => a + b) / step)
             const getCoupon_time = Math.floor(getCoupon_times.reduce((a, b) => a + b) / step)
 
             const nowLeft = (await getCouponInfo(saler, saler.username)).map(coupon => coupon.left)
             console.log(`并发量: ${step}, 用户平均响应时间: ${average}, 最小响应时间: ${min}, 最长响应时间: ${max}, 错误计数: ${err_cnt}`)
-            console.log(`平均登录时间 ： ${login_time}, 平均获取信息时间：${getCouponInfo_time}平均获取优惠券时间：${getCoupon_time}`)
+            console.log(`平均登录时间 ： ${login_time} 平均获取优惠券时间：${getCoupon_time}`)
             const succ_cnt_total = succ_cnt.reduce((a, b) => a+b)
             for (let i = 0; i < couponCnt; ++i) {
                 if (couponLeft[i] - nowLeft[i] !== succ_cnt[i]) {
@@ -94,7 +88,7 @@ async function main () {
             }
             console.log(`总计成功发放 ${succ_cnt_total}张优惠券`)
         }).then(() => { 
-            const ms = 10000
+            const ms = 1000
             console.log(`等待${ms}ms完成持久化`)
             console.log()
             return delay(ms)

@@ -7,7 +7,7 @@ services:
                 # 使用服务镜像,暴露3000端口到主机端。测试的时候直接连接本地的3000端口即可
                 image: littledarren/coupon_server
                   #使用下面的命令保证容器执行但不开启www服务
-                command: tail -f /dev/null 
+                  #command: tail -f /dev/null 
                 ports:
                         - "3000:3000"
                 depends_on:
