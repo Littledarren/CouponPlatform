@@ -38,6 +38,9 @@ async function main () {
     while (start < users.length) {
         const target_user = users.slice(start, start + step)
         const time = Array.from({ length: target_user.length })
+        const login_times = Array.from({ length: target_user.length })
+        const getCouponInfo_times = Array.from({ length: target_user.length })
+        const getCoupon_times = Array.from({ length: target_user.length })
         let err_cnt = 0
         const bar = new ProgressBar('进度[:bar] :rate/rps :percent', {
             complete: '=',
@@ -54,9 +57,15 @@ async function main () {
                 const start_time = new Date()
                 try {
                     user = (await signIn(user))
+                    // 1.
+                    login_times[i] = new Date() - start_time
                     while (rand_try--) await getCouponInfo(user, saler.username)
+                    // 2.
+                    getCouponInfo_times[i] =  new Date() - start_time - login_times[i]
                     const req = await getCoupon(user, saler.username, `${couponBaseName}${couponIndex}`)
                     if (req.status === 201) ++succ_cnt[couponIndex]
+                    // 3.
+                    getCoupon_times[i] =  new Date() - start_time - login_times[i] - getCouponInfo_times[i]
                     await getCouponInfo(user, user.username)
                 } catch (err) {
                     console.log(err.stack)
@@ -68,10 +77,15 @@ async function main () {
             })
         })).then(async () => {
             const average = Math.floor(time.reduce((a, b) => a + b) / step)
-            const min = Math.min(...time)
-            const max = Math.max(...time)
+            const min = Math.max(...time)
+            const max = Math.min(...time)
+            const login_time = Math.floor(login_times.reduce((a, b) => a + b) / step)
+            const getCouponInfo_time = Math.floor(getCouponInfo_times.reduce((a, b) => a + b) / step)
+            const getCoupon_time = Math.floor(getCoupon_times.reduce((a, b) => a + b) / step)
+
             const nowLeft = (await getCouponInfo(saler, saler.username)).map(coupon => coupon.left)
             console.log(`并发量: ${step}, 用户平均响应时间: ${average}, 最小响应时间: ${min}, 最长响应时间: ${max}, 错误计数: ${err_cnt}`)
+            console.log(`平均登录时间 ： ${login_time}, 平均获取信息时间：${getCouponInfo_time}平均获取优惠券时间：${getCoupon_time}`)
             const succ_cnt_total = succ_cnt.reduce((a, b) => a+b)
             for (let i = 0; i < couponCnt; ++i) {
                 if (couponLeft[i] - nowLeft[i] !== succ_cnt[i]) {
