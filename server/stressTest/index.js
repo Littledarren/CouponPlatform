@@ -53,10 +53,14 @@ async function main () {
                 let rand_try = Math.floor(Math.random() * 10)
                 const start_time = new Date()
                 try {
+                    // 1. 登录
                     user = (await signIn(user))
+                    // 2. 获取若干次优惠券信息
                     while (rand_try--) await getCouponInfo(user, saler.username)
+                    // 3. 获取优惠券
                     const req = await getCoupon(user, saler.username, `${couponBaseName}${couponIndex}`)
                     if (req.status === 201) ++succ_cnt[couponIndex]
+                    // 4. 再次获取优惠券信息
                     await getCouponInfo(user, user.username)
                 } catch (err) {
                     console.log(err.stack)
